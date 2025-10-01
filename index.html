@@ -4,78 +4,121 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Space Weather Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    /* Reset & base */
     body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
-      margin: 0 auto;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #FFA500; /* orange */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
       padding: 20px;
-      background: #f5f7fa;
-      color: #333;
     }
+
     h1 {
-      text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #FFA500;
+      text-shadow: 0 0 10px #FF6F00;
     }
-    #current-values {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+
+    .current-values {
+      display: flex;
       gap: 15px;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .current-value {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 0 7px rgb(0 0 0 / 0.1);
+
+    .value-card {
+      background-color: #1E1E1E;
+      border-radius: 12px;
+      padding: 20px 25px;
+      width: 170px;
+      box-shadow: 0 0 10px #FF6F00AA;
+      color: #FFA500;
       text-align: center;
+      font-weight: 600;
+      cursor: default;
+      transition: transform 0.2s ease;
     }
-    .current-value h2 {
-      margin: 0 0 10px 0;
-      font-size: 1.1rem;
-      color: #0077cc;
+
+    .value-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #FF8C00CC;
     }
+
+    .value-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.2rem;
+      color: #FFB84D;
+      text-shadow: 0 0 4px #FF8C00;
+    }
+
+    .value-card p {
+      font-size: 1.4rem;
+      margin: 0;
+      color: #FFD580;
+    }
+
+    .charts {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+    }
+
     canvas {
-      background: white;
-      margin-bottom: 50px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+      background-color: #000;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #FF6F00AA;
+      padding: 15px;
+      max-height: 350px;
     }
+
+    /* Loader spinner */
+    .loader {
+      border: 4px solid #FFA500;
+      border-top: 4px solid #FF6F00;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
   </style>
 </head>
 <body>
   <h1>Space Weather Dashboard</h1>
 
-  <div id="current-values">
-    <div class="current-value">
-      <h2>KP Index</h2>
-      <div id="kp-current">Loading...</div>
-    </div>
-    <div class="current-value">
-      <h2>Solar Flares (X-ray)</h2>
-      <div id="flare-current">Loading...</div>
-    </div>
-    <div class="current-value">
-      <h2>CMEs</h2>
-      <div id="cme-current">Loading...</div>
-    </div>
-    <div class="current-value">
-      <h2>Solar Wind</h2>
-      <div id="solarwind-current">Loading...</div>
-    </div>
-    <div class="current-value">
-      <h2>Proton Flux</h2>
-      <div id="proton-current">Loading...</div>
-    </div>
+  <div class="current-values">
+    <div class="value-card" id="kp-current"><h3>KP Index</h3><p><div class="loader"></div></p></div>
+    <div class="value-card" id="flares-current"><h3>Solar Flares (X-ray)</h3><p><div class="loader"></div></p></div>
+    <div class="value-card" id="cme-current"><h3>CMEs</h3><p><div class="loader"></div></p></div>
+    <div class="value-card" id="solarwind-current"><h3>Solar Wind</h3><p><div class="loader"></div></p></div>
+    <div class="value-card" id="proton-current"><h3>Proton Flux</h3><p><div class="loader"></div></p></div>
   </div>
 
-  <canvas id="kp-chart" height="150"></canvas>
-  <canvas id="flare-chart" height="150"></canvas>
-  <canvas id="cme-chart" height="150"></canvas>
-  <canvas id="solarwind-chart" height="150"></canvas>
-  <canvas id="proton-chart" height="150"></canvas>
+  <div class="charts">
+    <canvas id="kp-chart"></canvas>
+    <canvas id="flare-chart"></canvas>
+    <canvas id="cme-chart"></canvas>
+    <canvas id="solarwind-chart"></canvas>
+    <canvas id="proton-chart"></canvas>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
