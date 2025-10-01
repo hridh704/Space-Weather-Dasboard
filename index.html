@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Weather Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f7fa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    #current-values {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      margin-bottom: 40px;
+    }
+    .current-value {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 7px rgb(0 0 0 / 0.1);
+      text-align: center;
+    }
+    .current-value h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+      color: #0077cc;
+    }
+    canvas {
+      background: white;
+      margin-bottom: 50px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Space Weather Dashboard</h1>
+
+  <div id="current-values">
+    <div class="current-value">
+      <h2>KP Index</h2>
+      <div id="kp-current">Loading...</div>
+    </div>
+    <div class="current-value">
+      <h2>Solar Flares (X-ray)</h2>
+      <div id="flare-current">Loading...</div>
+    </div>
+    <div class="current-value">
+      <h2>CMEs</h2>
+      <div id="cme-current">Loading...</div>
+    </div>
+    <div class="current-value">
+      <h2>Solar Wind</h2>
+      <div id="solarwind-current">Loading...</div>
+    </div>
+    <div class="current-value">
+      <h2>Proton Flux</h2>
+      <div id="proton-current">Loading...</div>
+    </div>
+  </div>
+
+  <canvas id="kp-chart" height="150"></canvas>
+  <canvas id="flare-chart" height="150"></canvas>
+  <canvas id="cme-chart" height="150"></canvas>
+  <canvas id="solarwind-chart" height="150"></canvas>
+  <canvas id="proton-chart" height="150"></canvas>
+
+  <script src="main.js"></script>
+</body>
+</html>
