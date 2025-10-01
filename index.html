@@ -1,70 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Space Weather Forecast</title>
+
   <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+
+  <!-- App script -->
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">SW</div>
-      <div>
-        <h1>Space Weather Forecast</h1>
-        <div class="sub">Last 5 hours • Live NOAA / NASA data</div>
+  <div class="container">
+    <header class="site-header">
+      <div class="brand">
+        <div class="logo">☀️</div>
+        <div>
+          <h1>Space Weather Forecast</h1>
+          <p class="subtitle">Live space weather • Solar wind, Kp-index & CMEs</p>
+        </div>
       </div>
-      <div style="margin-left:auto">
-        <span class="pill" id="last-update">—</span>
+      <div class="right-header">
+        <div id="page-status" class="pill">Loading…</div>
       </div>
     </header>
 
-    <div class="grid">
-      <div class="left">
-        <div class="card">
-          <div class="label">Planetary Kp</div>
-          <div class="value" id="kp-val">—</div>
-          <div class="tiny" id="kp-time">—</div>
+    <main>
+      <section class="top-row">
+        <div class="card space-card">
+          <div class="card-title">Space Weather</div>
+          <div class="space-metrics">
+            <div class="metric">
+              <div class="metric-label">Solar Wind</div>
+              <div class="metric-value" id="metric-wind">— km/s</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Kp-index</div>
+              <div class="metric-value" id="metric-kp">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Recent CMEs</div>
+              <div class="metric-value" id="metric-cmes">—</div>
+            </div>
+          </div>
         </div>
-        <div class="card">
-          <div class="label">Solar Wind Speed (km/s)</div>
-          <div class="value" id="speed-val">—</div>
-          <div class="tiny" id="speed-time">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Solar Wind Density (cm⁻³)</div>
-          <div class="value" id="den-val">—</div>
-          <div class="tiny" id="den-time">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Bz (nT)</div>
-          <div class="value" id="bz-val">—</div>
-          <div class="tiny" id="bz-time">—</div>
-        </div>
-        <div class="card">
-          <div class="label">GOES X-ray Flux</div>
-          <div class="value" id="xray-val">—</div>
-          <div class="tiny" id="xray-time">—</div>
-        </div>
-      </div>
+      </section>
 
-      <div class="right">
-        <div class="chart-wrap">
-          <div class="chart-title">Solar Wind Speed</div>
-          <canvas id="chart-speed"></canvas>
+      <section class="forecast">
+        <h2>7-Day Space Forecast</h2>
+        <div id="forecast-cards" class="forecast-cards"></div>
+      </section>
+
+      <section class="charts">
+        <h2>Data Visualizer</h2>
+        <div class="chart-buttons">
+          <button onclick="toggleChart('wind')">Solar Wind</button>
+          <button onclick="toggleChart('kp')">Kp Index</button>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-title">Bz (Geomagnetic)</div>
-          <canvas id="chart-bz"></canvas>
+        <canvas id="spaceChart" height="120"></canvas>
+      </section>
+
+      <section class="impacts">
+        <h2>Why It Matters</h2>
+        <div class="impact-grid">
+          <div class="impact">
+            <h3>Satellite Operations</h3>
+            <p>High solar wind speeds and geomagnetic storms can affect satellite electronics, GPS signals, and communication systems.</p>
+          </div>
+          <div class="impact">
+            <h3>Power Grids</h3>
+            <p>Strong geomagnetic disturbances increase risks to transformers and ground-based power systems, potentially causing blackouts.</p>
+          </div>
+          <div class="impact">
+            <h3>Astronaut Safety</h3>
+            <p>Radiation from solar storms poses health risks to astronauts and requires mission adjustments during strong space weather events.</p>
+          </div>
         </div>
-        <div class="chart-wrap">
-          <div class="chart-title">GOES X-ray Flux</div>
-          <canvas id="chart-xray"></canvas>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </body>
 </html>
