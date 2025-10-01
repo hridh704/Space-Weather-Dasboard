@@ -1,124 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Space Weather Dashboard</title>
-  <style>
-    /* Reset & base */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
-      color: #FFA500; /* orange */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      color: #FFA500;
-      text-shadow: 0 0 10px #FF6F00;
-    }
-
-    .current-values {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .value-card {
-      background-color: #1E1E1E;
-      border-radius: 12px;
-      padding: 20px 25px;
-      width: 170px;
-      box-shadow: 0 0 10px #FF6F00AA;
-      color: #FFA500;
-      text-align: center;
-      font-weight: 600;
-      cursor: default;
-      transition: transform 0.2s ease;
-    }
-
-    .value-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px #FF8C00CC;
-    }
-
-    .value-card h3 {
-      margin: 0 0 8px 0;
-      font-size: 1.2rem;
-      color: #FFB84D;
-      text-shadow: 0 0 4px #FF8C00;
-    }
-
-    .value-card p {
-      font-size: 1.4rem;
-      margin: 0;
-      color: #FFD580;
-    }
-
-    .charts {
-      width: 100%;
-      max-width: 1100px;
-      display: flex;
-      flex-direction: column;
-      gap: 35px;
-    }
-
-    canvas {
-      background-color: #000;
-      border-radius: 12px;
-      box-shadow: 0 0 20px #FF6F00AA;
-      padding: 15px;
-      max-height: 350px;
-    }
-
-    /* Loader spinner */
-    .loader {
-      border: 4px solid #FFA500;
-      border-top: 4px solid #FF6F00;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Space Weather Forecast</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <h1>Space Weather Dashboard</h1>
+  <div class="app">
+    <header>
+      <div class="logo">SW</div>
+      <div>
+        <h1>Space Weather Forecast</h1>
+        <div class="sub">Last 5 hours • Live NOAA / NASA data</div>
+      </div>
+      <div style="margin-left:auto">
+        <span class="pill" id="last-update">—</span>
+      </div>
+    </header>
 
-  <div class="current-values">
-    <div class="value-card" id="kp-current"><h3>KP Index</h3><p><div class="loader"></div></p></div>
-    <div class="value-card" id="flares-current"><h3>Solar Flares (X-ray)</h3><p><div class="loader"></div></p></div>
-    <div class="value-card" id="cme-current"><h3>CMEs</h3><p><div class="loader"></div></p></div>
-    <div class="value-card" id="solarwind-current"><h3>Solar Wind</h3><p><div class="loader"></div></p></div>
-    <div class="value-card" id="proton-current"><h3>Proton Flux</h3><p><div class="loader"></div></p></div>
+    <div class="grid">
+      <div class="left">
+        <div class="card">
+          <div class="label">Planetary Kp</div>
+          <div class="value" id="kp-val">—</div>
+          <div class="tiny" id="kp-time">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Solar Wind Speed (km/s)</div>
+          <div class="value" id="speed-val">—</div>
+          <div class="tiny" id="speed-time">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Solar Wind Density (cm⁻³)</div>
+          <div class="value" id="den-val">—</div>
+          <div class="tiny" id="den-time">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Bz (nT)</div>
+          <div class="value" id="bz-val">—</div>
+          <div class="tiny" id="bz-time">—</div>
+        </div>
+        <div class="card">
+          <div class="label">GOES X-ray Flux</div>
+          <div class="value" id="xray-val">—</div>
+          <div class="tiny" id="xray-time">—</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="chart-wrap">
+          <div class="chart-title">Solar Wind Speed</div>
+          <canvas id="chart-speed"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">Bz (Geomagnetic)</div>
+          <canvas id="chart-bz"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-title">GOES X-ray Flux</div>
+          <canvas id="chart-xray"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="charts">
-    <canvas id="kp-chart"></canvas>
-    <canvas id="flare-chart"></canvas>
-    <canvas id="cme-chart"></canvas>
-    <canvas id="solarwind-chart"></canvas>
-    <canvas id="proton-chart"></canvas>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="main.js"></script>
 </body>
 </html>
