@@ -1,212 +1,187 @@
-// URLs for NOAA JSON APIs
-const urls = {
-  kp: "https://services.swpc.noaa.gov/json/planetary_k_index_1m.json",
-  flares: "https://services.swpc.noaa.gov/json/goes/primary/xray-flares-latest.json",
-  cmes: "https://services.swpc.noaa.gov/json/cme.json",
-  solarWind: "https://services.swpc.noaa.gov/json/solar-wind.json",
-  protonFlux: "https://services.swpc.noaa.gov/json/goes/primary/particles-latest.json"
-};
+const API_BASE = 'https://services.swpc.noaa.gov/json';
 
-let charts = {}; // Hold Chart.js instances
-
-// Helper: Format datetime string to human-readable (HH:mm)
-function formatTime(datetimeStr) {
-  const d = new Date(datetimeStr);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+// Helper to format time nicely
+function formatTime(date) {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Fetch and process KP index data
-async function fetchKP() {
-  const res = await fetch(urls.kp);
-  const data = await res.json();
-
-  // Last 24 entries (24 minutes)
-  const recent = data.slice(-24);
-
-  const labels = recent.map((d) => formatTime(d.time_tag));
-  const values = recent.map((d) => parseFloat(d.kp_index));
-
-  // Update current value display (last reading)
-  const currentValue = values[values.length - 1].toFixed(1);
-  document.getElementById("kp-current").textContent = currentValue;
-
-  return { labels, values };
-}
-
-// Fetch and process Solar Flares (X-ray)
-async function fetchFlares() {
-  const res = await fetch(urls.flares);
-  const data = await res.json();
-
-  // data is sorted newest first; reverse it
-  const sorted = data.slice().reverse();
-
-  // We'll plot X-ray flux (flux field), label with time
-  // Limit to last 24 readings if available
-  const recent = sorted.slice(-24);
-
-  const labels = recent.map((d) => formatTime(d.time_tag));
-  const values = recent.map((d) => parseFloat(d.flux));
-
-  // Current max class and flux
-  const latest = sorted[sorted.length - 1];
-  if (latest) {
-    document.getElementById("flare-current").textContent = `${latest.class_type} - ${latest.flux}`;
+// Create or update chart
+function createOrUpdateChart(canvasId, label, labels, data, borderColor) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (ctx.chart) {
+    ctx.chart.data.labels = labels;
+    ctx.chart.data.datasets[0].data = data;
+    ctx.chart.update();
   } else {
-    document.getElementById("flare-current").textContent = "N/A";
-  }
-
-  return { labels, values };
-}
-
-// Fetch and process CMEs (Coronal Mass Ejections)
-async function fetchCMEs() {
-  const res = await fetch(urls.cmes);
-  const data = await res.json();
-
-  // Sort ascending by time_tag
-  const sorted = data.slice().sort((a, b) => new Date(a.time_tag) - new Date(b.time_tag));
-  // Last 24 CMEs or fewer if less data
-  const recent = sorted.slice(-24);
-
-  const labels = recent.map((d) => formatTime(d.time_tag));
-  // CME speed (km/s) as value
-  const values = recent.map((d) => parseFloat(d.speed_km_s) || 0);
-
-  // Show last CME speed as current
-  const latest = sorted[sorted.length - 1];
-  if (latest) {
-    document.getElementById("cme-current").textContent = `${latest.speed_km_s} km/s`;
-  } else {
-    document.getElementById("cme-current").textContent = "N/A";
-  }
-
-  return { labels, values };
-}
-
-// Fetch and process Solar Wind data
-async function fetchSolarWind() {
-  const res = await fetch(urls.solarWind);
-  const data = await res.json();
-
-  // Sort ascending by time_tag
-  const sorted = data.slice().sort((a, b) => new Date(a.time_tag) - new Date(b.time_tag));
-  // Take last 24 entries
-  const recent = sorted.slice(-24);
-
-  const labels = recent.map((d) => formatTime(d.time_tag));
-  // Use speed in km/s for plot
-  const values = recent.map((d) => parseFloat(d.speed) || 0);
-
-  // Latest speed as current
-  const latest = sorted[sorted.length - 1];
-  if (latest) {
-    document.getElementById("solarwind-current").textContent = `${latest.speed} km/s`;
-  } else {
-    document.getElementById("solarwind-current").textContent = "N/A";
-  }
-
-  return { labels, values };
-}
-
-// Fetch and process Proton Flux data
-async function fetchProtonFlux() {
-  const res = await fetch(urls.protonFlux);
-  const data = await res.json();
-
-  // Sort ascending by time_tag
-  const sorted = data.slice().sort((a, b) => new Date(a.time_tag) - new Date(b.time_tag));
-  // Take last 24 entries
-  const recent = sorted.slice(-24);
-
-  const labels = recent.map((d) => formatTime(d.time_tag));
-  // Proton flux: pflux field or proton_flux_10MeV (choose one)
-  // Using "pflux" here
-  const values = recent.map((d) => parseFloat(d.pflux) || 0);
-
-  // Latest proton flux current value
-  const latest = sorted[sorted.length - 1];
-  if (latest) {
-    document.getElementById("proton-current").textContent = latest.pflux;
-  } else {
-    document.getElementById("proton-current").textContent = "N/A";
-  }
-
-  return { labels, values };
-}
-
-// Create or update Chart.js chart
-function createOrUpdateChart(id, label, labels, data, color) {
-  const ctx = document.getElementById(id).getContext("2d");
-
-  if (charts[id]) {
-    charts[id].data.labels = labels;
-    charts[id].data.datasets[0].data = data;
-    charts[id].update();
-  } else {
-    charts[id] = new Chart(ctx, {
-      type: "line",
+    ctx.chart = new Chart(ctx, {
+      type: 'line',
       data: {
         labels: labels,
-        datasets: [
-          {
-            label: label,
-            data: data,
-            borderColor: color,
-            backgroundColor: color + "33",
-            fill: true,
-            tension: 0.2,
-            pointRadius: 2,
-            borderWidth: 2,
-          },
-        ],
+        datasets: [{
+          label: label,
+          data: data,
+          fill: false,
+          borderColor: borderColor,
+          backgroundColor: borderColor,
+          pointRadius: 2,
+          borderWidth: 2,
+          tension: 0.2,
+        }]
       },
       options: {
-        animation: false,
         responsive: true,
+        animation: { duration: 700 },
         scales: {
+          x: {
+            ticks: { color: '#FFA500' },
+            grid: { color: '#333' }
+          },
           y: {
             beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 6,
-            },
-          },
-          x: {
-            ticks: {
-              maxTicksLimit: 6,
-            },
-          },
+            ticks: { color: '#FFA500' },
+            grid: { color: '#333' }
+          }
         },
         plugins: {
-          legend: { display: true },
-        },
-      },
+          legend: { labels: { color: '#FFA500' } },
+          tooltip: {
+            mode: 'nearest',
+            intersect: false,
+            backgroundColor: '#FF8C00',
+            titleColor: '#000',
+            bodyColor: '#000',
+          }
+        }
+      }
     });
   }
 }
 
-// Main update function
-async function updateAll() {
+// Fetch KP Index data
+async function fetchKP() {
   try {
-    const kp = await fetchKP();
-    createOrUpdateChart("kp-chart", "KP Index", kp.labels, kp.values, "rgb(75, 192, 192)");
-
-    const flares = await fetchFlares();
-    createOrUpdateChart("flare-chart", "Solar Flares (X-ray Flux)", flares.labels, flares.values, "rgb(255, 99, 132)");
-
-    const cmes = await fetchCMEs();
-    createOrUpdateChart("cme-chart", "CMEs Speed (km/s)", cmes.labels, cmes.values, "rgb(255, 159, 64)");
-
-    const solarWind = await fetchSolarWind();
-    createOrUpdateChart("solarwind-chart", "Solar Wind Speed (km/s)", solarWind.labels, solarWind.values, "rgb(54, 162, 235)");
-
-    const proton = await fetchProtonFlux();
-    createOrUpdateChart("proton-chart", "Proton Flux (pflux)", proton.labels, proton.values, "rgb(153, 102, 255)");
-  } catch (err) {
-    console.error("Error updating data:", err);
+    const resp = await fetch(`${API_BASE}/kp-index.json`);
+    if (!resp.ok) throw new Error('KP fetch failed');
+    const data = await resp.json();
+    const labels = data.map(d => formatTime(new Date(d.time_tag)));
+    const values = data.map(d => parseFloat(d.kp_index));
+    const latest = data[data.length - 1];
+    return { labels, values, latestValue: latest.kp_index };
+  } catch {
+    return null;
   }
 }
 
-// Initial load + auto-refresh every 5 minutes
+// Fetch Solar Flares data
+async function fetchFlares() {
+  try {
+    const resp = await fetch(`${API_BASE}/xray-flares.json`);
+    if (!resp.ok) throw new Error('Flares fetch failed');
+    const data = await resp.json();
+    const labels = data.map(d => formatTime(new Date(d.time_tag)));
+    const values = data.map(d => parseFloat(d['flux']) || 0);
+    const latest = data[data.length - 1];
+    const latestClass = latest['classType'] || 'N/A';
+    return { labels, values, latestValue: `${latestClass} - ${latest.flux}` };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch CME data (speed)
+async function fetchCMEs() {
+  try {
+    const resp = await fetch(`${API_BASE}/cme.json`);
+    if (!resp.ok) throw new Error('CMEs fetch failed');
+    const data = await resp.json();
+    const filtered = data.filter(d => d.speed && d.time);
+    const labels = filtered.map(d => formatTime(new Date(d.time)));
+    const values = filtered.map(d => parseFloat(d.speed));
+    const latest = filtered[filtered.length - 1];
+    return { labels, values, latestValue: latest ? latest.speed : 'N/A' };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch Solar Wind speed
+async function fetchSolarWind() {
+  try {
+    const resp = await fetch(`${API_BASE}/solar-wind.json`);
+    if (!resp.ok) throw new Error('Solar Wind fetch failed');
+    const data = await resp.json();
+    const labels = data.map(d => formatTime(new Date(d.time_tag)));
+    const values = data.map(d => parseFloat(d['speed']));
+    const latest = data[data.length - 1];
+    return { labels, values, latestValue: latest.speed };
+  } catch {
+    return null;
+  }
+}
+
+// Fetch Proton Flux data
+async function fetchProtonFlux() {
+  try {
+    const resp = await fetch(`${API_BASE}/proton-flux.json`);
+    if (!resp.ok) throw new Error('Proton Flux fetch failed');
+    const data = await resp.json();
+    const labels = data.map(d => formatTime(new Date(d.time_tag)));
+    const values = data.map(d => parseFloat(d['flux']));
+    const latest = data[data.length - 1];
+    return { labels, values, latestValue: latest.flux };
+  } catch {
+    return null;
+  }
+}
+
+// Update all data & charts
+async function updateAll() {
+  // Update KP
+  const kpData = await fetchKP();
+  if (kpData) {
+    document.querySelector('#kp-current p').textContent = kpData.latestValue;
+    createOrUpdateChart("kp-chart", "KP Index", kpData.labels, kpData.values, "#FFA500");
+  } else {
+    document.querySelector('#kp-current p').textContent = 'Data unavailable';
+  }
+
+  // Update Flares
+  const flaresData = await fetchFlares();
+  if (flaresData) {
+    document.querySelector('#flares-current p').textContent = flaresData.latestValue;
+    createOrUpdateChart("flare-chart", "Solar Flares (X-ray Flux)", flaresData.labels, flaresData.values, "#FF8C00");
+  } else {
+    document.querySelector('#flares-current p').textContent = 'Data unavailable';
+  }
+
+  // Update CMEs
+  const cmesData = await fetchCMEs();
+  if (cmesData) {
+    document.querySelector('#cme-current p').textContent = cmesData.latestValue;
+    createOrUpdateChart("cme-chart", "CMEs Speed (km/s)", cmesData.labels, cmesData.values, "#FFA500");
+  } else {
+    document.querySelector('#cme-current p').textContent = 'Data unavailable';
+  }
+
+  // Update Solar Wind
+  const solarWindData = await fetchSolarWind();
+  if (solarWindData) {
+    document.querySelector('#solarwind-current p').textContent = solarWindData.latestValue;
+    createOrUpdateChart("solarwind-chart", "Solar Wind Speed (km/s)", solarWindData.labels, solarWindData.values, "#FF8C00");
+  } else {
+    document.querySelector('#solarwind-current p').textContent = 'Data unavailable';
+  }
+
+  // Update Proton Flux
+  const protonData = await fetchProtonFlux();
+  if (protonData) {
+    document.querySelector('#proton-current p').textContent = protonData.latestValue;
+    createOrUpdateChart("proton-chart", "Proton Flux", protonData.labels, protonData.values, "#FFA500");
+  } else {
+    document.querySelector('#proton-current p').textContent = 'Data unavailable';
+  }
+}
+
+// Run initially and every 5 minutes
 updateAll();
 setInterval(updateAll, 5 * 60 * 1000);
