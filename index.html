@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interactive Space Weather Forecast</title>
+<title>Space Weather Forecast</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -11,8 +11,8 @@
   :root {
     --bg-dark-start: #0a0a0a;
     --bg-dark-end: #000000;
-    --card-bg: rgba(20, 20, 20, 0.75);
-    --card-bg-hover: rgba(30, 30, 30, 0.9);
+    --card-bg: rgba(20, 20, 20, 0.7);
+    --card-bg-hover: rgba(30, 30, 30, 0.85);
     --accent-orange: #ff8c00;
     --text-color: #e0e0e0;
     --text-light: #ffffff;
@@ -47,7 +47,7 @@
     text-align: center;
     padding: 2rem 1rem;
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-size: clamp(2rem, 5vw, 3.2rem);
     color: var(--text-light);
     font-weight: 700;
     letter-spacing: 3px;
@@ -58,136 +58,292 @@
     text-align: center;
     width: 100%;
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 400;
-    margin-bottom: 1.5rem;
-  }
-
-  .cards, .forecast-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    padding: 1rem;
-    justify-content: center;
     margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
-  .card {
-    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 50%), var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 1.5rem;
-    flex: 1 1 200px;
-    max-width: 250px;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-    border: 1px solid var(--border-color);
-    border-top-width: 4px;
-  }
-  
-  .card:hover {
-    background: var(--card-bg-hover);
-    border-color: var(--border-color-hover);
-  }
-  
-  .card .card-content {
+  .main-content-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 100%;
+    gap: 2rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .conditions-card {
+    --active-accent-color: var(--border-color);
+    background-color: var(--card-bg);
+    background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 60%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 2rem 0;
+    width: 100%;
+    max-width: 1000px;
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--active-accent-color);
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    transition: border-top-color 0.5s ease-in-out;
+  }
+  .conditions-card.accent-border-wind { --active-accent-color: var(--accent-wind); }
+  .conditions-card.accent-border-geomagnetic { --active-accent-color: var(--accent-geomagnetic); }
+  .conditions-card.accent-border-flare { --active-accent-color: var(--accent-flare); }
+  .conditions-card.accent-border-sep { --active-accent-color: var(--accent-sep); }
+
+
+  .conditions-carousel {
+    position: relative;
+  }
+
+  .carousel-track-container {
+    overflow: hidden;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .metric-slide {
+    width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 0 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .slide-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .slide-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    max-width: 800px;
+  }
+
+  .slide-metrics-grid.single-metric {
+    grid-template-columns: 1fr;
+    max-width: 300px;
+  }
+
+  .slide-metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+
+  .slide-metric-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -1.25rem; /* half of gap */
+    top: 15%;
+    height: 70%;
+    width: 1px;
+    background-image: linear-gradient(to bottom, transparent, var(--border-color), transparent);
   }
 
   .card-icon {
     margin-bottom: 1rem;
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,255,255,0.03);
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1);
   }
   .card-icon svg {
-    width: 100%;
-    height: 100%;
+    width: 32px;
+    height: 32px;
     stroke-width: 1.5;
   }
 
-  .card h3 {
+  .slide-metric-item h3 {
     margin: 0 0 0.5rem 0;
     font-weight: 600;
     color: var(--text-light);
     font-size: 1.1rem;
-    text-align: center;
-  }
-
-  .card p.main-metric {
-    margin: 0.5rem 0;
-    font-size: 2rem;
-    font-weight: 700;
-    font-family: 'Orbitron', sans-serif;
+    white-space: nowrap;
   }
   
-  .card p.main-metric span {
-    font-size: 1rem;
+  .slide-metric-item p.main-metric {
+    margin: 0.5rem 0;
+    font-size: 2.8rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    line-height: 1.2;
+  }
+  
+  .slide-metric-item p.main-metric span {
+    font-size: 1.2rem;
     color: var(--text-color);
     font-family: 'Poppins', sans-serif;
   }
-  
-  /* Card Accent Colors */
-  .cards .card:nth-child(1) { border-top-color: var(--accent-wind); }
-  .cards .card:nth-child(1) p.main-metric, .cards .card:nth-child(1) .card-icon { color: var(--accent-wind); }
 
-  .cards .card:nth-child(2) { border-top-color: var(--accent-flare); }
-  .cards .card:nth-child(2) p.main-metric, .cards .card:nth-child(2) .card-icon { color: var(--accent-flare); }
-
-  .cards .card:nth-child(3) { border-top-color: var(--accent-geomagnetic); }
-  .cards .card:nth-child(3) p.main-metric, .cards .card:nth-child(3) .card-icon { color: var(--accent-geomagnetic); }
-
-  .cards .card:nth-child(4) { border-top-color: var(--accent-sunspot); }
-  .cards .card:nth-child(4) p.main-metric, .cards .card:nth-child(4) .card-icon { color: var(--accent-sunspot); }
-
-  .cards .card:nth-child(5) { border-top-color: var(--accent-density); }
-  .cards .card:nth-child(5) p.main-metric, .cards .card:nth-child(5) .card-icon { color: var(--accent-density); }
-
-  .cards .card:nth-child(6) { border-top-color: var(--accent-sep); }
-  .cards .card:nth-child(6) p.main-metric, .cards .card:nth-child(6) .card-icon { color: var(--accent-sep); }
-
-  .card .sub-metric {
-    font-size: 0.9rem;
+  .slide-metric-item .sub-metric {
+    font-size: 0.95rem;
     color: var(--text-color);
   }
   
+  .slide-description {
+    text-align: center;
+    max-width: 600px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    min-height: 40px;
+  }
+
+  /* Specific larger text for Geomagnetic Activity slide */
+  .metric-slide[data-accent="geomagnetic"] .main-metric {
+    font-size: 4.5rem;
+  }
+  .metric-slide[data-accent="geomagnetic"] .sub-metric {
+    font-size: 1.2rem;
+  }
+  .metric-slide[data-accent="geomagnetic"] .slide-description {
+    font-size: 1.1rem;
+  }
+
+  .carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    z-index: 10;
+  }
+  
+  .carousel-button:hover {
+    background: var(--card-bg-hover);
+    border-color: var(--border-color-hover);
+  }
+
+  .carousel-button.prev { left: 1rem; }
+  .carousel-button.next { right: 1rem; }
+  
+  .carousel-button svg { width: 22px; height: 22px; }
+
+  .carousel-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border-color);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .carousel-dot.active {
+    background: var(--accent-orange);
+    transform: scale(1.2);
+  }
+
+  /* Metric Accent Colors */
+  .metric-wind .main-metric, .metric-wind .card-icon { color: var(--accent-wind); }
+  .metric-flare .main-metric, .metric-flare .card-icon { color: var(--accent-flare); }
+  .metric-geomagnetic .main-metric, .metric-geomagnetic .card-icon { color: var(--accent-geomagnetic); }
+  .metric-sunspot .main-metric, .metric-sunspot .card-icon { color: var(--accent-sunspot); }
+  .metric-density .main-metric, .metric-density .card-icon { color: var(--accent-density); }
+  .metric-sep .main-metric, .metric-sep .card-icon { color: var(--accent-sep); }
+  
   .forecast-container {
-    gap: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto 3rem auto;
   }
   
   .forecast-card {
+    --glow-color: transparent;
     background: var(--card-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
-    padding: 1rem;
-    flex: 1 1 90px;
-    max-width: 110px;
+    padding: 1.5rem;
+    flex: 1 1 110px;
+    max-width: 130px;
     text-align: center;
-    border: 1px solid var(--border-color);
-    transition: background-color 0.3s ease;
+    border: 1px solid;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
   }
   
   .forecast-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px -2px var(--glow-color);
     background: var(--card-bg-hover);
   }
 
-  .forecast-card .day { font-weight: 600; display: block; margin-bottom: 0.5rem; color: var(--text-light); }
-  .forecast-card .icon { width: 32px; height: 32px; margin: 0.5rem auto; }
-  .forecast-card .value { font-size: 0.9em; font-weight: 300; }
+  .forecast-card.quiet { border-color: var(--severity-low); --glow-color: var(--severity-low); }
+  .forecast-card.unsettled { border-color: var(--severity-medium); --glow-color: var(--severity-medium); }
+  .forecast-card.g1-storm { border-color: var(--severity-high); --glow-color: var(--severity-high); }
+  .forecast-card.g2-storm { border-color: var(--severity-critical); --glow-color: var(--severity-critical); }
+
+  .forecast-card .day { font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-light); font-size: 1.1rem; }
+  .forecast-card .icon { width: 40px; height: 40px; margin: 0.75rem auto; color: var(--text-color); }
+  .forecast-card .value { font-size: 1em; font-weight: 300; margin-top: 0.75rem; }
+  .forecast-card .wind-speed { 
+    font-size: 0.9em; 
+    font-weight: 300;
+    color: var(--accent-wind);
+    margin-top: 0.75rem;
+  }
 
   /* Recent Flares Section */
   .recent-flares-section {
-    max-width: 1000px;
+    width: 100%;
+    max-width: 1100px;
     margin: 0 auto 3rem auto;
   }
   
   .flares-timeline {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     overflow-x: auto;
     padding: 1rem;
     scrollbar-width: thin;
@@ -211,14 +367,14 @@
   }
 
   .flare-card {
-    background: var(--card-bg);
     backdrop-filter: blur(5px);
     border-radius: 10px;
-    padding: 1rem;
-    min-width: 130px;
+    padding: 1.25rem;
+    min-width: 150px;
     text-align: center;
     transition: background-color 0.3s ease;
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
+    border-left-width: 5px;
   }
   
   .flare-card:hover {
@@ -227,27 +383,135 @@
   
   .flare-card .flare-class {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
   }
   
   .flare-card .flare-time {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-color);
   }
   
-  .flare-card.c-class { border-color: var(--severity-medium); }
+  .flare-card.c-class { 
+    border-left-color: var(--severity-medium); 
+    background: linear-gradient(90deg, hsla(45, 100%, 51%, 0.1), transparent 80%);
+  }
   .flare-card.c-class .flare-class { color: var(--severity-medium); }
   
-  .flare-card.m-class { border-color: var(--severity-high); }
+  .flare-card.m-class { 
+    border-left-color: var(--severity-high); 
+    background: linear-gradient(90deg, hsla(33, 100%, 50%, 0.1), transparent 80%);
+  }
   .flare-card.m-class .flare-class { color: var(--severity-high); }
   
-  .flare-card.x-class { border-color: var(--severity-critical); }
+  .flare-card.x-class { 
+    border-left-color: var(--severity-critical); 
+    background: linear-gradient(90deg, hsla(16, 100%, 50%, 0.1), transparent 80%);
+  }
   .flare-card.x-class .flare-class { color: var(--severity-critical); }
+
+  /* CME Detections Section */
+  .cme-section {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 3rem auto;
+  }
+
+  .cme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .cme-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+  .cme-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-color-hover);
+  }
+
+  .cme-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .cme-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .cme-time-speed {
+    line-height: 1.4;
+  }
+
+  .cme-date {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-orange);
+    margin: 0;
+  }
+
+  .cme-speed {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin: 0;
+  }
+
+  .cme-severity {
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .cme-card.minor .cme-severity { background-color: var(--severity-low); color: var(--bg-dark-end); }
+  .cme-card.moderate .cme-severity { background-color: var(--severity-medium); color: var(--bg-dark-end); }
+  .cme-card.strong .cme-severity { background-color: var(--severity-critical); color: var(--text-light); }
+
+  .cme-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+  }
+
+  .cme-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+  }
+
+  .cme-label {
+    color: var(--text-color);
+    font-weight: 300;
+  }
+
+  .cme-value {
+    color: var(--text-light);
+    font-weight: 600;
+    color: var(--accent-orange);
+  }
 
   .charts-container {
     max-width: 1000px;
+    width: 100%;
     margin: 2rem auto;
     padding: 2rem;
     border-radius: 16px;
@@ -255,6 +519,23 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
+    box-sizing: border-box;
+  }
+  
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .chart-header .section-title {
+    margin: 0;
+    text-align: left;
+    width: auto;
+    justify-content: flex-start;
   }
 
   .chart-buttons {
@@ -262,7 +543,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin: 0;
   }
 
   .chart-buttons button {
@@ -302,67 +583,85 @@
 </head>
 <body>
 
-<header>Interactive Space Weather Forecast</header>
+<header>Space Weather Forecast</header>
 
-<div class="cards">
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+<div class="main-content-container">
+  <div class="conditions-card">
+    <h3 class="section-title" style="margin-bottom: 2rem;">Current Conditions</h3>
+    <div class="conditions-carousel">
+      <div class="carousel-track-container">
+          <div class="carousel-track">
+              <div class="metric-slide" data-accent="wind">
+                  <h4 class="slide-title">Solar Wind & IMF</h4>
+                  <div class="slide-metrics-grid">
+                      <div class="slide-metric-item metric-wind">
+                          <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg></div>
+                          <h3>Speed</h3>
+                          <p class="main-metric">450 <span>km/s</span></p>
+                      </div>
+                      <div class="slide-metric-item metric-density">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+                          <h3>Density</h3>
+                          <p class="main-metric">5.2 <span>p/cm³</span></p>
+                      </div>
+                      <div class="slide-metric-item metric-geomagnetic">
+                           <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+                          <h3>IMF Bz</h3>
+                          <p class="main-metric">-4.5 <span>nT</span></p>
+                      </div>
+                  </div>
+                  <p class="slide-description">A high-speed stream is currently active. The southward orientation of the IMF (Bz) may trigger geomagnetic activity.</p>
+              </div>
+              <div class="metric-slide" data-accent="geomagnetic">
+                  <h4 class="slide-title">Geomagnetic Activity</h4>
+                  <div class="slide-metrics-grid single-metric">
+                      <div class="slide-metric-item metric-geomagnetic">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8.11 2.99"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
+                          <h3>Kp Index</h3>
+                          <p class="main-metric">4</p>
+                          <p class="sub-metric">G1 (Minor) Storm</p>
+                      </div>
+                  </div>
+                  <p class="slide-description">Minor geomagnetic storming in progress. Possible impacts include weak power grid fluctuations and minor impact on satellite operations. Aurora may be visible at high latitudes.</p>
+              </div>
+              <div class="metric-slide" data-accent="flare">
+                  <h4 class="slide-title">Solar Activity</h4>
+                  <div class="slide-metrics-grid">
+                      <div class="slide-metric-item metric-flare">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+                          <h3>Largest Flare (24h)</h3>
+                          <p class="main-metric">M1.2</p>
+                      </div>
+                      <div class="slide-metric-item metric-sunspot">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
+                          <h3>Sunspot Count</h3>
+                          <p class="main-metric">78</p>
+                      </div>
+                      <div class="slide-metric-item metric-flare">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
+                          <h3>M-Flare Prob.</h3>
+                          <p class="main-metric">55<span>%</span></p>
+                      </div>
+                  </div>
+                  <p class="slide-description">Active region AR3664 remains the primary source of flare activity. Further M-class flares are likely.</p>
+              </div>
+               <div class="metric-slide" data-accent="sep">
+                  <h4 class="slide-title">Radiation Environment</h4>
+                  <div class="slide-metrics-grid single-metric">
+                      <div class="slide-metric-item metric-sep">
+                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                          <h3>SEP Radiation</h3>
+                          <p class="main-metric">S1 <span>(Minor)</span></p>
+                          <p class="sub-metric">15% Risk</p>
+                      </div>
+                  </div>
+                  <p class="slide-description">Minor risk of Solar Energetic Particle (SEP) events. Potential for minor impacts on sensitive satellite electronics and HF radio propagation at polar regions.</p>
+              </div>
+          </div>
       </div>
-      <h3>Solar Wind</h3>
-      <p class="main-metric">450 <span>km/s</span></p>
-      <p class="sub-metric">Source: Coronal Hole</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-      </div>
-      <h3>Solar Flare</h3>
-      <p class="main-metric">M1.2</p>
-      <p class="sub-metric">24h Change: +0.3</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-      </div>
-      <h3>Geomagnetic Storm</h3>
-      <p class="main-metric">Kp 4</p>
-      <p class="sub-metric">Level: G1 (Minor)</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-      </div>
-      <h3>Sunspot Number</h3>
-      <p class="main-metric">78</p>
-      <p class="sub-metric">Region: AR3664</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-      </div>
-      <h3>Wind Density</h3>
-      <p class="main-metric">5.2 <span>p/cm³</span></p>
-      <p class="sub-metric">Normal Levels</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-content">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-      </div>
-      <h3>SEP Radiation</h3>
-      <p class="main-metric">15%</p>
-      <p class="sub-metric">Minor Risk</p>
+      <button class="carousel-button prev" aria-label="Previous Metric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+      <button class="carousel-button next" aria-label="Next Metric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+      <div class="carousel-nav"></div>
     </div>
   </div>
 </div>
@@ -370,13 +669,13 @@
 <div class="forecast-section">
     <h3 class="section-title">7-Day Geomagnetic Forecast</h3>
     <div class="forecast-container">
-      <div class="forecast-card"><span class="day">Mon</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
-      <div class="forecast-card"><span class="day">Tue</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
-      <div class="forecast-card"><span class="day">Wed</span><svg class="icon" style="color: var(--severity-medium);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span></div>
-      <div class="forecast-card"><span class="day">Thu</span><svg class="icon" style="color: var(--severity-high);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G1 Storm</span></div>
-      <div class="forecast-card"><span class="day">Fri</span><svg class="icon" style="color: var(--severity-critical);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G2 Storm</span></div>
-      <div class="forecast-card"><span class="day">Sat</span><svg class="icon" style="color: var(--severity-medium);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span></div>
-      <div class="forecast-card"><span class="day">Sun</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
+      <div class="forecast-card quiet"><span class="day">Mon</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span><span class="wind-speed">350 km/s</span></div>
+      <div class="forecast-card quiet"><span class="day">Tue</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span><span class="wind-speed">380 km/s</span></div>
+      <div class="forecast-card unsettled"><span class="day">Wed</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span><span class="wind-speed">450 km/s</span></div>
+      <div class="forecast-card g1-storm"><span class="day">Thu</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G1 Storm</span><span class="wind-speed">550 km/s</span></div>
+      <div class="forecast-card g2-storm"><span class="day">Fri</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G2 Storm</span><span class="wind-speed">650 km/s</span></div>
+      <div class="forecast-card unsettled"><span class="day">Sat</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span><span class="wind-speed">500 km/s</span></div>
+      <div class="forecast-card quiet"><span class="day">Sun</span><svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span><span class="wind-speed">420 km/s</span></div>
     </div>
 </div>
 
@@ -406,15 +705,113 @@
     </div>
 </div>
 
+<div class="cme-section">
+  <h3 class="section-title">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+    Recent CME Detections
+  </h3>
+  <div class="cme-grid">
+    <div class="cme-card moderate">
+      <div class="cme-header">
+        <div class="cme-icon" style="color: var(--severity-medium)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5zM14.5 14.5A2.5 2.5 0 0017 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5z"/><path d="M2 20h20"/><path d="M17 19v-5H7v5h10z"/></svg>
+        </div>
+        <div class="cme-time-speed">
+          <p class="cme-date">2025-10-01 16:18 UTC</p>
+          <p class="cme-speed">Speed: 551 km/s</p>
+        </div>
+        <div class="cme-severity">Moderate</div>
+      </div>
+      <div class="cme-details">
+        <div class="cme-detail-item">
+          <span class="cme-label">Direction:</span>
+          <span class="cme-value">Earth-directed</span>
+        </div>
+        <div class="cme-detail-item">
+          <span class="cme-label">Est. Arrival:</span>
+          <span class="cme-value">2025-10-04 12:31 UTC</span>
+        </div>
+      </div>
+    </div>
+    <div class="cme-card minor">
+      <div class="cme-header">
+        <div class="cme-icon" style="color: var(--severity-low)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="cme-time-speed">
+          <p class="cme-date">2025-09-30 17:12 UTC</p>
+          <p class="cme-speed">Speed: 499 km/s</p>
+        </div>
+        <div class="cme-severity">Minor</div>
+      </div>
+      <div class="cme-details">
+        <div class="cme-detail-item">
+          <span class="cme-label">Direction:</span>
+          <span class="cme-value">Glancing blow</span>
+        </div>
+        <div class="cme-detail-item">
+          <span class="cme-label">Est. Arrival:</span>
+          <span class="cme-value">2025-10-02 06:58 UTC</span>
+        </div>
+      </div>
+    </div>
+    <div class="cme-card strong">
+      <div class="cme-header">
+        <div class="cme-icon" style="color: var(--severity-critical)">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5z"/><path d="M14.5 14.5A2.5 2.5 0 0017 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5z"/><path d="M2 20h20"/><path d="M17 19v-5H7v5h10z"/></svg>
+        </div>
+        <div class="cme-time-speed">
+          <p class="cme-date">2025-09-29 21:53 UTC</p>
+          <p class="cme-speed">Speed: 850 km/s</p>
+        </div>
+        <div class="cme-severity">Strong</div>
+      </div>
+      <div class="cme-details">
+        <div class="cme-detail-item">
+          <span class="cme-label">Direction:</span>
+          <span class="cme-value">Earth-directed</span>
+        </div>
+        <div class="cme-detail-item">
+          <span class="cme-label">Est. Arrival:</span>
+          <span class="cme-value">2025-10-01 19:04 UTC</span>
+        </div>
+      </div>
+    </div>
+     <div class="cme-card strong">
+      <div class="cme-header">
+        <div class="cme-icon" style="color: var(--severity-critical)">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5z"/><path d="M14.5 14.5A2.5 2.5 0 0017 12c0-1.38-.5-2-1-3-1-2-4-1-4 2 .5 2.5 2.5 2.5 2.5 3.5z"/><path d="M2 20h20"/><path d="M17 19v-5H7v5h10z"/></svg>
+        </div>
+        <div class="cme-time-speed">
+          <p class="cme-date">2025-09-28 16:53 UTC</p>
+          <p class="cme-speed">Speed: 716 km/s</p>
+        </div>
+        <div class="cme-severity">Strong</div>
+      </div>
+      <div class="cme-details">
+        <div class="cme-detail-item">
+          <span class="cme-label">Direction:</span>
+          <span class="cme-value">Earth-directed</span>
+        </div>
+        <div class="cme-detail-item">
+          <span class="cme-label">Est. Arrival:</span>
+          <span class="cme-value">2025-10-01 10:33 UTC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="charts-container">
-  <h3 class="section-title">Data Visualizations (48 Hour Period)</h3>
-  <div class="chart-buttons">
-    <button onclick="showChart('kpChart', this)" class="active">KP Index</button>
-    <button onclick="showChart('solarWindChart', this)">Solar Wind</button>
-    <button onclick="showChart('densityChart', this)">Wind Density</button>
-    <button onclick="showChart('imfChart', this)">IMF Bz</button>
-    <button onclick="showChart('flareChart', this)">Solar Flares</button>
+  <div class="chart-header">
+    <h3 class="section-title">Data Visualizations (48 Hour Period)</h3>
+    <div class="chart-buttons">
+      <button onclick="showChart('kpChart', this)" class="active">KP Index</button>
+      <button onclick="showChart('solarWindChart', this)">Solar Wind</button>
+      <button onclick="showChart('densityChart', this)">Wind Density</button>
+      <button onclick="showChart('imfChart', this)">IMF Bz</button>
+      <button onclick="showChart('flareChart', this)">Solar Flares</button>
+    </div>
   </div>
   <canvas id="kpChart" class="active"></canvas>
   <canvas id="solarWindChart"></canvas>
@@ -425,6 +822,71 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  // --- Carousel Logic ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const conditionsCard = document.querySelector('.conditions-card');
+    const track = document.querySelector('.carousel-track');
+    if (!track || !conditionsCard) return;
+    
+    const slides = Array.from(track.children);
+    const nextButton = document.querySelector('.carousel-button.next');
+    const prevButton = document.querySelector('.carousel-button.prev');
+    const dotsNav = document.querySelector('.carousel-nav');
+
+    if (slides.length > 0) {
+      slides.forEach((_, index) => {
+        const button = document.createElement('button');
+        button.classList.add('carousel-dot');
+        button.setAttribute('aria-label', `Go to slide ${index + 1}`);
+        if (index === 0) button.classList.add('active');
+        dotsNav.appendChild(button);
+      });
+
+      const dots = Array.from(dotsNav.children);
+      let currentSlideIndex = 0;
+      
+      const accentClasses = ['accent-border-wind', 'accent-border-geomagnetic', 'accent-border-flare', 'accent-border-sep'];
+
+      const updateCarousel = (targetIndex) => {
+        if (targetIndex < 0 || targetIndex >= slides.length) return;
+
+        track.style.transform = `translateX(-${targetIndex * 100}%)`;
+        
+        // Update dots
+        if (dots.length > 0) {
+          dots[currentSlideIndex].classList.remove('active');
+          dots[targetIndex].classList.add('active');
+        }
+        
+        // Update buttons
+        prevButton.style.display = targetIndex === 0 ? 'none' : 'flex';
+        nextButton.style.display = targetIndex === slides.length - 1 ? 'none' : 'flex';
+
+        // Update card border color
+        conditionsCard.classList.remove(...accentClasses);
+        const newAccentClass = slides[targetIndex].dataset.accent;
+        if (newAccentClass) {
+          conditionsCard.classList.add(`accent-border-${newAccentClass}`);
+        }
+
+        currentSlideIndex = targetIndex;
+      };
+
+      prevButton.addEventListener('click', () => updateCarousel(currentSlideIndex - 1));
+      nextButton.addEventListener('click', () => updateCarousel(currentSlideIndex + 1));
+      dotsNav.addEventListener('click', e => {
+        const targetDot = e.target.closest('button.carousel-dot');
+        if (!targetDot) return;
+        const targetIndex = dots.findIndex(dot => dot === targetDot);
+        updateCarousel(targetIndex);
+      });
+
+      updateCarousel(0);
+    }
+  });
+
+
+  // --- Chart Logic (global for onclick) ---
   const chartInstances = {};
 
   function showChart(id, buttonEl) {
