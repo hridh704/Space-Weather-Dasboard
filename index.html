@@ -288,13 +288,31 @@
   
   .forecast-container {
     display: flex;
-    flex-wrap: wrap;
     gap: 1.5rem;
-    justify-content: center;
     max-width: 1100px;
     margin: 0 auto 3rem auto;
+    overflow-x: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-orange) var(--bg-dark-start);
   }
   
+  .forecast-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .forecast-container::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+  }
+
+  .forecast-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent-orange);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
   .forecast-card {
     --glow-color: transparent;
     background: var(--card-bg);
@@ -302,8 +320,7 @@
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 1.5rem;
-    flex: 1 1 110px;
-    max-width: 130px;
+    flex: 0 0 130px;
     text-align: center;
     border: 1px solid;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
@@ -579,6 +596,103 @@
     opacity: 1;
   }
 
+  /* --- Responsive Design --- */
+  @media (max-width: 1024px) {
+    .cme-grid {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    .slide-metrics-grid {
+      gap: 1.5rem;
+    }
+    .metric-slide {
+      padding: 0 3rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 0.5rem;
+    }
+    .main-content-container {
+      padding: 0;
+    }
+    header {
+      padding: 1.5rem 0.5rem;
+      font-size: 1.8rem;
+    }
+    .section-title {
+      font-size: 1.5rem;
+    }
+    .conditions-card {
+      padding: 1.5rem 0;
+    }
+    .metric-slide {
+      padding: 0 1rem;
+    }
+    .slide-metrics-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .slide-metrics-grid.single-metric {
+      max-width: none;
+    }
+    .slide-metric-item:not(:last-child)::after {
+      display: none;
+    }
+    .slide-title {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .slide-metric-item p.main-metric {
+      font-size: 2.2rem;
+    }
+    .metric-slide[data-accent="geomagnetic"] .main-metric {
+      font-size: 3.5rem;
+    }
+    .slide-description {
+      font-size: 0.9rem;
+    }
+    .carousel-button {
+      width: 35px;
+      height: 35px;
+    }
+    .carousel-button.prev { left: 0.5rem; }
+    .carousel-button.next { right: 0.5rem; }
+
+    .cme-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    .cme-card {
+      padding: 1.5rem;
+    }
+    .cme-header {
+      gap: 1rem;
+    }
+    .cme-icon svg {
+      width: 40px;
+      height: 40px;
+    }
+    .cme-date { font-size: 1rem; }
+    .cme-speed { font-size: 0.9rem; }
+    .cme-severity { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+
+    .charts-container {
+      padding: 1.5rem;
+    }
+    .chart-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .chart-buttons {
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+    .chart-buttons button {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
 </style>
 </head>
 <body>
