@@ -32,6 +32,7 @@
     --accent-sunspot: #4caf50;
     --accent-density: #03a9f4;
     --accent-sep: #f44336;
+    --accent-imf: #9c27b0; /* Use same as geomagnetic for consistency */
   }
 
   body {
@@ -66,251 +67,118 @@
     justify-content: center;
     gap: 0.5rem;
   }
-
-  .main-content-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
+  
+  /* --- Current Conditions Grid --- */
+  .current-conditions-section {
+    max-width: 1100px;
+    margin: 0 auto 3rem auto;
     padding: 1rem;
-    margin-bottom: 2rem;
   }
-
-  .conditions-card {
-    --active-accent-color: var(--border-color);
+  
+  .conditions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .metric-card {
     background-color: var(--card-bg);
-    background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 60%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 16px;
-    padding: 2rem 0;
-    width: 100%;
-    max-width: 1000px;
+    padding: 1.5rem;
     border: 1px solid var(--border-color);
-    border-top: 4px solid var(--active-accent-color);
-    box-sizing: border-box;
-    position: relative;
-    overflow: hidden;
-    transition: border-top-color 0.5s ease-in-out;
-  }
-  .conditions-card.accent-border-wind { --active-accent-color: var(--accent-wind); }
-  .conditions-card.accent-border-geomagnetic { --active-accent-color: var(--accent-geomagnetic); }
-  .conditions-card.accent-border-flare { --active-accent-color: var(--accent-flare); }
-  .conditions-card.accent-border-sep { --active-accent-color: var(--accent-sep); }
-
-
-  .conditions-carousel {
-    position: relative;
-  }
-
-  .carousel-track-container {
-    overflow: hidden;
-  }
-
-  .carousel-track {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-  }
-
-  .metric-slide {
-    width: 100%;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    padding: 0 4rem;
+    border-top-width: 4px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.3s ease, background-color 0.3s ease;
   }
 
-  .slide-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.5rem;
+  .metric-card:hover {
+    transform: translateY(-5px);
+    background-color: var(--card-bg-hover);
+  }
+
+  .metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .metric-header h3 {
+    margin: 0;
+    font-weight: 400;
     color: var(--text-light);
-    margin-top: 0;
-    margin-bottom: 2rem;
-    text-align: center;
+    font-size: 1rem;
+    line-height: 1.4;
   }
   
-  .slide-metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2.5rem;
-    width: 100%;
-    margin-bottom: 1.5rem;
-    max-width: 800px;
-  }
-
-  .slide-metrics-grid.single-metric {
-    grid-template-columns: 1fr;
-    max-width: 300px;
-  }
-
-  .slide-metric-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-  }
-
-  .slide-metric-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: -1.25rem; /* half of gap */
-    top: 15%;
-    height: 70%;
-    width: 1px;
-    background-image: linear-gradient(to bottom, transparent, var(--border-color), transparent);
-  }
-
   .card-icon {
-    margin-bottom: 1rem;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255,255,255,0.03);
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .card-icon svg {
     width: 32px;
     height: 32px;
+    flex-shrink: 0;
+  }
+
+  .card-icon svg {
+    width: 100%;
+    height: 100%;
     stroke-width: 1.5;
   }
 
-  .slide-metric-item h3 {
-    margin: 0 0 0.5rem 0;
-    font-weight: 600;
-    color: var(--text-light);
-    font-size: 1.1rem;
-    white-space: nowrap;
-  }
-  
-  .slide-metric-item p.main-metric {
-    margin: 0.5rem 0;
-    font-size: 2.8rem;
+  .main-metric {
+    margin: 0;
+    font-size: 2.5rem;
     font-weight: 700;
     font-family: 'Orbitron', sans-serif;
     line-height: 1.2;
+    text-align: left;
   }
   
-  .slide-metric-item p.main-metric span {
-    font-size: 1.2rem;
+  .main-metric span {
+    font-size: 1.1rem;
     color: var(--text-color);
     font-family: 'Poppins', sans-serif;
+    font-weight: 400;
   }
-
-  .slide-metric-item .sub-metric {
-    font-size: 0.95rem;
+  
+  .sub-metric {
+    font-size: 0.9rem;
     color: var(--text-color);
+    margin-top: 0.25rem;
   }
+
+  /* Card Accent Colors */
+  .accent-border-wind { border-top-color: var(--accent-wind); }
+  .metric-wind { color: var(--accent-wind); }
+
+  .accent-border-density { border-top-color: var(--accent-density); }
+  .metric-density { color: var(--accent-density); }
+
+  .accent-border-imf { border-top-color: var(--accent-imf); }
+  .metric-imf { color: var(--accent-imf); }
+
+  .accent-border-geomagnetic { border-top-color: var(--accent-geomagnetic); }
+  .metric-geomagnetic { color: var(--accent-geomagnetic); }
   
-  .slide-description {
-    text-align: center;
-    max-width: 600px;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--text-color);
-    min-height: 40px;
-  }
+  .accent-border-flare { border-top-color: var(--accent-flare); }
+  .metric-flare { color: var(--accent-flare); }
 
-  /* Specific larger text for Geomagnetic Activity slide */
-  .metric-slide[data-accent="geomagnetic"] .main-metric {
-    font-size: 4.5rem;
-  }
-  .metric-slide[data-accent="geomagnetic"] .sub-metric {
-    font-size: 1.2rem;
-  }
-  .metric-slide[data-accent="geomagnetic"] .slide-description {
-    font-size: 1.1rem;
-  }
-
-  .carousel-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-    z-index: 10;
-  }
+  .accent-border-sunspot { border-top-color: var(--accent-sunspot); }
+  .metric-sunspot { color: var(--accent-sunspot); }
   
-  .carousel-button:hover {
-    background: var(--card-bg-hover);
-    border-color: var(--border-color-hover);
-  }
+  .accent-border-sep { border-top-color: var(--accent-sep); }
+  .metric-sep { color: var(--accent-sep); }
 
-  .carousel-button.prev { left: 1rem; }
-  .carousel-button.next { right: 1rem; }
-  
-  .carousel-button svg { width: 22px; height: 22px; }
-
-  .carousel-nav {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
-
-  .carousel-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--border-color);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-
-  .carousel-dot.active {
-    background: var(--accent-orange);
-    transform: scale(1.2);
-  }
-
-  /* Metric Accent Colors */
-  .metric-wind .main-metric, .metric-wind .card-icon { color: var(--accent-wind); }
-  .metric-flare .main-metric, .metric-flare .card-icon { color: var(--accent-flare); }
-  .metric-geomagnetic .main-metric, .metric-geomagnetic .card-icon { color: var(--accent-geomagnetic); }
-  .metric-sunspot .main-metric, .metric-sunspot .card-icon { color: var(--accent-sunspot); }
-  .metric-density .main-metric, .metric-density .card-icon { color: var(--accent-density); }
-  .metric-sep .main-metric, .metric-sep .card-icon { color: var(--accent-sep); }
-  
   .forecast-container {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1.5rem;
     max-width: 1100px;
     margin: 0 auto 3rem auto;
-    overflow-x: auto;
     padding: 1rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-orange) var(--bg-dark-start);
-  }
-  
-  .forecast-container::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .forecast-container::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.5);
-    border-radius: 4px;
-  }
-
-  .forecast-container::-webkit-scrollbar-thumb {
-    background-color: var(--accent-orange);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: content-box;
   }
 
   .forecast-card {
@@ -320,7 +188,7 @@
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 1.5rem;
-    flex: 0 0 130px;
+    width: 140px;
     text-align: center;
     border: 1px solid;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
@@ -598,23 +466,17 @@
 
   /* --- Responsive Design --- */
   @media (max-width: 1024px) {
+    .conditions-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
     .cme-grid {
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-    .slide-metrics-grid {
-      gap: 1.5rem;
-    }
-    .metric-slide {
-      padding: 0 3rem;
     }
   }
 
   @media (max-width: 768px) {
     body {
       padding: 0.5rem;
-    }
-    .main-content-container {
-      padding: 0;
     }
     header {
       padding: 1.5rem 0.5rem;
@@ -623,42 +485,9 @@
     .section-title {
       font-size: 1.5rem;
     }
-    .conditions-card {
-      padding: 1.5rem 0;
+    .conditions-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
-    .metric-slide {
-      padding: 0 1rem;
-    }
-    .slide-metrics-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    .slide-metrics-grid.single-metric {
-      max-width: none;
-    }
-    .slide-metric-item:not(:last-child)::after {
-      display: none;
-    }
-    .slide-title {
-      font-size: 1.2rem;
-      margin-bottom: 1.5rem;
-    }
-    .slide-metric-item p.main-metric {
-      font-size: 2.2rem;
-    }
-    .metric-slide[data-accent="geomagnetic"] .main-metric {
-      font-size: 3.5rem;
-    }
-    .slide-description {
-      font-size: 0.9rem;
-    }
-    .carousel-button {
-      width: 35px;
-      height: 35px;
-    }
-    .carousel-button.prev { left: 0.5rem; }
-    .carousel-button.next { right: 0.5rem; }
-
     .cme-grid {
       grid-template-columns: 1fr;
       gap: 1rem;
@@ -693,91 +522,101 @@
       font-size: 0.9rem;
     }
   }
+
+  @media (max-width: 480px) {
+    .conditions-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .metric-card {
+      padding: 1rem;
+    }
+    .metric-header h3 {
+      font-size: 0.85rem;
+    }
+    .main-metric {
+      font-size: 1.8rem;
+    }
+    .main-metric span {
+      font-size: 0.9rem;
+    }
+  }
 </style>
 </head>
 <body>
 
 <header>Space Weather Forecast</header>
 
-<div class="main-content-container">
-  <div class="conditions-card">
-    <h3 class="section-title" style="margin-bottom: 2rem;">Current Conditions</h3>
-    <div class="conditions-carousel">
-      <div class="carousel-track-container">
-          <div class="carousel-track">
-              <div class="metric-slide" data-accent="wind">
-                  <h4 class="slide-title">Solar Wind & IMF</h4>
-                  <div class="slide-metrics-grid">
-                      <div class="slide-metric-item metric-wind">
-                          <div class="card-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg></div>
-                          <h3>Speed</h3>
-                          <p class="main-metric">450 <span>km/s</span></p>
-                      </div>
-                      <div class="slide-metric-item metric-density">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
-                          <h3>Density</h3>
-                          <p class="main-metric">5.2 <span>p/cm³</span></p>
-                      </div>
-                      <div class="slide-metric-item metric-geomagnetic">
-                           <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
-                          <h3>IMF Bz</h3>
-                          <p class="main-metric">-4.5 <span>nT</span></p>
-                      </div>
-                  </div>
-                  <p class="slide-description">A high-speed stream is currently active. The southward orientation of the IMF (Bz) may trigger geomagnetic activity.</p>
-              </div>
-              <div class="metric-slide" data-accent="geomagnetic">
-                  <h4 class="slide-title">Geomagnetic Activity</h4>
-                  <div class="slide-metrics-grid single-metric">
-                      <div class="slide-metric-item metric-geomagnetic">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8.11 2.99"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
-                          <h3>Kp Index</h3>
-                          <p class="main-metric">4</p>
-                          <p class="sub-metric">G1 (Minor) Storm</p>
-                      </div>
-                  </div>
-                  <p class="slide-description">Minor geomagnetic storming in progress. Possible impacts include weak power grid fluctuations and minor impact on satellite operations. Aurora may be visible at high latitudes.</p>
-              </div>
-              <div class="metric-slide" data-accent="flare">
-                  <h4 class="slide-title">Solar Activity</h4>
-                  <div class="slide-metrics-grid">
-                      <div class="slide-metric-item metric-flare">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
-                          <h3>Largest Flare (24h)</h3>
-                          <p class="main-metric">M1.2</p>
-                      </div>
-                      <div class="slide-metric-item metric-sunspot">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
-                          <h3>Sunspot Count</h3>
-                          <p class="main-metric">78</p>
-                      </div>
-                      <div class="slide-metric-item metric-flare">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
-                          <h3>M-Flare Prob.</h3>
-                          <p class="main-metric">55<span>%</span></p>
-                      </div>
-                  </div>
-                  <p class="slide-description">Active region AR3664 remains the primary source of flare activity. Further M-class flares are likely.</p>
-              </div>
-               <div class="metric-slide" data-accent="sep">
-                  <h4 class="slide-title">Radiation Environment</h4>
-                  <div class="slide-metrics-grid single-metric">
-                      <div class="slide-metric-item metric-sep">
-                          <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                          <h3>SEP Radiation</h3>
-                          <p class="main-metric">S1 <span>(Minor)</span></p>
-                          <p class="sub-metric">15% Risk</p>
-                      </div>
-                  </div>
-                  <p class="slide-description">Minor risk of Solar Energetic Particle (SEP) events. Potential for minor impacts on sensitive satellite electronics and HF radio propagation at polar regions.</p>
-              </div>
-          </div>
-      </div>
-      <button class="carousel-button prev" aria-label="Previous Metric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-      <button class="carousel-button next" aria-label="Next Metric"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-      <div class="carousel-nav"></div>
+<div class="current-conditions-section">
+    <h3 class="section-title">Current Conditions</h3>
+    <div class="conditions-grid">
+        <!-- Solar Wind Speed -->
+        <div class="metric-card accent-border-wind">
+            <div class="metric-header">
+                <h3>Solar Wind Speed</h3>
+                <div class="card-icon metric-wind"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg></div>
+            </div>
+            <p class="main-metric metric-wind">450 <span>km/s</span></p>
+        </div>
+        <!-- Solar Wind Density -->
+        <div class="metric-card accent-border-density">
+            <div class="metric-header">
+                <h3>Wind Density</h3>
+                <div class="card-icon metric-density"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+            </div>
+            <p class="main-metric metric-density">5.2 <span>p/cm³</span></p>
+        </div>
+        <!-- IMF Bz -->
+        <div class="metric-card accent-border-imf">
+            <div class="metric-header">
+                <h3>IMF Bz</h3>
+                <div class="card-icon metric-imf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+            </div>
+            <p class="main-metric metric-imf">-4.5 <span>nT</span></p>
+        </div>
+        <!-- Kp Index -->
+        <div class="metric-card accent-border-geomagnetic">
+            <div class="metric-header">
+                <h3>Kp Index</h3>
+                <div class="card-icon metric-geomagnetic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8.11 2.99"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg></div>
+            </div>
+            <p class="main-metric metric-geomagnetic">4</p>
+            <p class="sub-metric">G1 (Minor) Storm</p>
+        </div>
+        <!-- Largest Flare -->
+        <div class="metric-card accent-border-flare">
+            <div class="metric-header">
+                <h3>Largest Flare (24h)</h3>
+                <div class="card-icon metric-flare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+            </div>
+            <p class="main-metric metric-flare">M1.2</p>
+        </div>
+        <!-- Sunspot Count -->
+        <div class="metric-card accent-border-sunspot">
+            <div class="metric-header">
+                <h3>Sunspot Count</h3>
+                <div class="card-icon metric-sunspot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></div>
+            </div>
+            <p class="main-metric metric-sunspot">78</p>
+        </div>
+        <!-- M-Flare Probability -->
+        <div class="metric-card accent-border-flare">
+            <div class="metric-header">
+                <h3>M-Flare Prob.</h3>
+                <div class="card-icon metric-flare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
+            </div>
+            <p class="main-metric metric-flare">55<span>%</span></p>
+        </div>
+        <!-- SEP Radiation -->
+        <div class="metric-card accent-border-sep">
+            <div class="metric-header">
+                <h3>SEP Radiation</h3>
+                <div class="card-icon metric-sep"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+            </div>
+            <p class="main-metric metric-sep">S1</p>
+            <p class="sub-metric">Minor Risk</p>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="forecast-section">
@@ -936,70 +775,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // --- Carousel Logic ---
-  document.addEventListener('DOMContentLoaded', () => {
-    const conditionsCard = document.querySelector('.conditions-card');
-    const track = document.querySelector('.carousel-track');
-    if (!track || !conditionsCard) return;
-    
-    const slides = Array.from(track.children);
-    const nextButton = document.querySelector('.carousel-button.next');
-    const prevButton = document.querySelector('.carousel-button.prev');
-    const dotsNav = document.querySelector('.carousel-nav');
-
-    if (slides.length > 0) {
-      slides.forEach((_, index) => {
-        const button = document.createElement('button');
-        button.classList.add('carousel-dot');
-        button.setAttribute('aria-label', `Go to slide ${index + 1}`);
-        if (index === 0) button.classList.add('active');
-        dotsNav.appendChild(button);
-      });
-
-      const dots = Array.from(dotsNav.children);
-      let currentSlideIndex = 0;
-      
-      const accentClasses = ['accent-border-wind', 'accent-border-geomagnetic', 'accent-border-flare', 'accent-border-sep'];
-
-      const updateCarousel = (targetIndex) => {
-        if (targetIndex < 0 || targetIndex >= slides.length) return;
-
-        track.style.transform = `translateX(-${targetIndex * 100}%)`;
-        
-        // Update dots
-        if (dots.length > 0) {
-          dots[currentSlideIndex].classList.remove('active');
-          dots[targetIndex].classList.add('active');
-        }
-        
-        // Update buttons
-        prevButton.style.display = targetIndex === 0 ? 'none' : 'flex';
-        nextButton.style.display = targetIndex === slides.length - 1 ? 'none' : 'flex';
-
-        // Update card border color
-        conditionsCard.classList.remove(...accentClasses);
-        const newAccentClass = slides[targetIndex].dataset.accent;
-        if (newAccentClass) {
-          conditionsCard.classList.add(`accent-border-${newAccentClass}`);
-        }
-
-        currentSlideIndex = targetIndex;
-      };
-
-      prevButton.addEventListener('click', () => updateCarousel(currentSlideIndex - 1));
-      nextButton.addEventListener('click', () => updateCarousel(currentSlideIndex + 1));
-      dotsNav.addEventListener('click', e => {
-        const targetDot = e.target.closest('button.carousel-dot');
-        if (!targetDot) return;
-        const targetIndex = dots.findIndex(dot => dot === targetDot);
-        updateCarousel(targetIndex);
-      });
-
-      updateCarousel(0);
-    }
-  });
-
-
   // --- Chart Logic (global for onclick) ---
   const chartInstances = {};
 
