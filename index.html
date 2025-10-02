@@ -1,86 +1,613 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Space Weather Forecast</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Space Weather Forecast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark-start: #0a0a0a;
+    --bg-dark-end: #000000;
+    --card-bg: rgba(20, 20, 20, 0.75);
+    --card-bg-hover: rgba(30, 30, 30, 0.9);
+    --accent-orange: #ff8c00;
+    --text-color: #e0e0e0;
+    --text-light: #ffffff;
+    --border-color: rgba(255, 140, 0, 0.15);
+    --border-color-hover: rgba(255, 140, 0, 0.4);
 
-  <link rel="stylesheet" href="style.css">
+    /* Severity Colors */
+    --severity-low: #39d353;
+    --severity-medium: #ffc107;
+    --severity-high: #ff8c00;
+    --severity-critical: #ff4500;
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    /* Card Accent Colors */
+    --accent-wind: #00bfff;
+    --accent-flare: #ffc107;
+    --accent-geomagnetic: #9c27b0;
+    --accent-sunspot: #4caf50;
+    --accent-density: #03a9f4;
+    --accent-sep: #f44336;
+  }
 
-  <!-- App script -->
-  <script src="script.js" defer></script>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(-45deg, var(--bg-dark-start), var(--bg-dark-end));
+    color: var(--text-color);
+    padding: 1rem;
+    min-height: 100vh;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    color: var(--text-light);
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+
+  .section-title {
+    color: var(--text-light);
+    text-align: center;
+    width: 100%;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+  }
+
+  .cards, .forecast-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 50%), var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    flex: 1 1 200px;
+    max-width: 250px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    border: 1px solid var(--border-color);
+    border-top-width: 4px;
+  }
+  
+  .card:hover {
+    background: var(--card-bg-hover);
+    border-color: var(--border-color-hover);
+  }
+  
+  .card .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .card-icon {
+    margin-bottom: 1rem;
+    width: 48px;
+    height: 48px;
+  }
+  .card-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke-width: 1.5;
+  }
+
+  .card h3 {
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .card p.main-metric {
+    margin: 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+  }
+  
+  .card p.main-metric span {
+    font-size: 1rem;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Card Accent Colors */
+  .cards .card:nth-child(1) { border-top-color: var(--accent-wind); }
+  .cards .card:nth-child(1) p.main-metric, .cards .card:nth-child(1) .card-icon { color: var(--accent-wind); }
+
+  .cards .card:nth-child(2) { border-top-color: var(--accent-flare); }
+  .cards .card:nth-child(2) p.main-metric, .cards .card:nth-child(2) .card-icon { color: var(--accent-flare); }
+
+  .cards .card:nth-child(3) { border-top-color: var(--accent-geomagnetic); }
+  .cards .card:nth-child(3) p.main-metric, .cards .card:nth-child(3) .card-icon { color: var(--accent-geomagnetic); }
+
+  .cards .card:nth-child(4) { border-top-color: var(--accent-sunspot); }
+  .cards .card:nth-child(4) p.main-metric, .cards .card:nth-child(4) .card-icon { color: var(--accent-sunspot); }
+
+  .cards .card:nth-child(5) { border-top-color: var(--accent-density); }
+  .cards .card:nth-child(5) p.main-metric, .cards .card:nth-child(5) .card-icon { color: var(--accent-density); }
+
+  .cards .card:nth-child(6) { border-top-color: var(--accent-sep); }
+  .cards .card:nth-child(6) p.main-metric, .cards .card:nth-child(6) .card-icon { color: var(--accent-sep); }
+
+  .card .sub-metric {
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+  
+  .forecast-container {
+    gap: 1rem;
+  }
+  
+  .forecast-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1rem;
+    flex: 1 1 90px;
+    max-width: 110px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.3s ease;
+  }
+  
+  .forecast-card:hover {
+    background: var(--card-bg-hover);
+  }
+
+  .forecast-card .day { font-weight: 600; display: block; margin-bottom: 0.5rem; color: var(--text-light); }
+  .forecast-card .icon { width: 32px; height: 32px; margin: 0.5rem auto; }
+  .forecast-card .value { font-size: 0.9em; font-weight: 300; }
+
+  /* Recent Flares Section */
+  .recent-flares-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem auto;
+  }
+  
+  .flares-timeline {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-orange) var(--bg-dark-start);
+  }
+
+  .flares-timeline::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .flares-timeline::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+  }
+
+  .flares-timeline::-webkit-scrollbar-thumb {
+    background-color: var(--accent-orange);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  .flare-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    padding: 1rem;
+    min-width: 130px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    border: 1px solid transparent;
+  }
+  
+  .flare-card:hover {
+    background-color: var(--card-bg-hover);
+  }
+  
+  .flare-card .flare-class {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .flare-card .flare-time {
+    font-size: 0.9rem;
+    color: var(--text-color);
+  }
+  
+  .flare-card.c-class { border-color: var(--severity-medium); }
+  .flare-card.c-class .flare-class { color: var(--severity-medium); }
+  
+  .flare-card.m-class { border-color: var(--severity-high); }
+  .flare-card.m-class .flare-class { color: var(--severity-high); }
+  
+  .flare-card.x-class { border-color: var(--severity-critical); }
+  .flare-card.x-class .flare-class { color: var(--severity-critical); }
+
+  .charts-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 16px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+  }
+
+  .chart-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .chart-buttons button {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    background-color: transparent;
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .chart-buttons button:hover,
+  .chart-buttons button.active {
+    background-color: var(--accent-orange);
+    color: var(--bg-dark-end);
+    border-color: var(--accent-orange);
+  }
+
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  canvas.active {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+</style>
 </head>
 <body>
-  <div class="container">
-    <header class="site-header">
-      <div class="brand">
-        <div class="logo">☀️</div>
-        <div>
-          <h1>Space Weather Forecast</h1>
-          <p class="subtitle">Live space weather • Solar wind, Kp-index & CMEs</p>
-        </div>
+
+<header>Interactive Space Weather Forecast</header>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
       </div>
-      <div class="right-header">
-        <div id="page-status" class="pill">Loading…</div>
-      </div>
-    </header>
-
-    <main>
-      <section class="top-row">
-        <div class="card space-card">
-          <div class="card-title">Space Weather</div>
-          <div class="space-metrics">
-            <div class="metric">
-              <div class="metric-label">Solar Wind</div>
-              <div class="metric-value" id="metric-wind">— km/s</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Kp-index</div>
-              <div class="metric-value" id="metric-kp">—</div>
-            </div>
-            <div class="metric">
-              <div class="metric-label">Recent CMEs</div>
-              <div class="metric-value" id="metric-cmes">—</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="forecast">
-        <h2>7-Day Space Forecast</h2>
-        <div id="forecast-cards" class="forecast-cards"></div>
-      </section>
-
-      <section class="charts">
-        <h2>Data Visualizer</h2>
-        <div class="chart-buttons">
-          <button onclick="toggleChart('wind')">Solar Wind</button>
-          <button onclick="toggleChart('kp')">Kp Index</button>
-        </div>
-        <canvas id="spaceChart" height="120"></canvas>
-      </section>
-
-      <section class="impacts">
-        <h2>Why It Matters</h2>
-        <div class="impact-grid">
-          <div class="impact">
-            <h3>Satellite Operations</h3>
-            <p>High solar wind speeds and geomagnetic storms can affect satellite electronics, GPS signals, and communication systems.</p>
-          </div>
-          <div class="impact">
-            <h3>Power Grids</h3>
-            <p>Strong geomagnetic disturbances increase risks to transformers and ground-based power systems, potentially causing blackouts.</p>
-          </div>
-          <div class="impact">
-            <h3>Astronaut Safety</h3>
-            <p>Radiation from solar storms poses health risks to astronauts and requires mission adjustments during strong space weather events.</p>
-          </div>
-        </div>
-      </section>
-    </main>
+      <h3>Solar Wind</h3>
+      <p class="main-metric">450 <span>km/s</span></p>
+      <p class="sub-metric">Source: Coronal Hole</p>
+    </div>
   </div>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </div>
+      <h3>Solar Flare</h3>
+      <p class="main-metric">M1.2</p>
+      <p class="sub-metric">24h Change: +0.3</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      </div>
+      <h3>Geomagnetic Storm</h3>
+      <p class="main-metric">Kp 4</p>
+      <p class="sub-metric">Level: G1 (Minor)</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+      </div>
+      <h3>Sunspot Number</h3>
+      <p class="main-metric">78</p>
+      <p class="sub-metric">Region: AR3664</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+      </div>
+      <h3>Wind Density</h3>
+      <p class="main-metric">5.2 <span>p/cm³</span></p>
+      <p class="sub-metric">Normal Levels</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-content">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h3>SEP Radiation</h3>
+      <p class="main-metric">15%</p>
+      <p class="sub-metric">Minor Risk</p>
+    </div>
+  </div>
+</div>
+
+<div class="forecast-section">
+    <h3 class="section-title">7-Day Geomagnetic Forecast</h3>
+    <div class="forecast-container">
+      <div class="forecast-card"><span class="day">Mon</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
+      <div class="forecast-card"><span class="day">Tue</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
+      <div class="forecast-card"><span class="day">Wed</span><svg class="icon" style="color: var(--severity-medium);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span></div>
+      <div class="forecast-card"><span class="day">Thu</span><svg class="icon" style="color: var(--severity-high);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G1 Storm</span></div>
+      <div class="forecast-card"><span class="day">Fri</span><svg class="icon" style="color: var(--severity-critical);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">G2 Storm</span></div>
+      <div class="forecast-card"><span class="day">Sat</span><svg class="icon" style="color: var(--severity-medium);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span class="value">Unsettled</span></div>
+      <div class="forecast-card"><span class="day">Sun</span><svg class="icon" style="color: var(--severity-low);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="value">Quiet</span></div>
+    </div>
+</div>
+
+<div class="recent-flares-section">
+    <h3 class="section-title">Recent Solar Flares (Last 5 Hours)</h3>
+    <div class="flares-timeline">
+      <div class="flare-card x-class">
+        <p class="flare-class">X1.5</p>
+        <p class="flare-time">02:33 UTC</p>
+      </div>
+      <div class="flare-card m-class">
+        <p class="flare-class">M2.1</p>
+        <p class="flare-time">01:58 UTC</p>
+      </div>
+      <div class="flare-card m-class">
+        <p class="flare-class">M1.0</p>
+        <p class="flare-time">00:15 UTC</p>
+      </div>
+      <div class="flare-card c-class">
+        <p class="flare-class">C8.9</p>
+        <p class="flare-time">23:45 UTC</p>
+      </div>
+       <div class="flare-card c-class">
+        <p class="flare-class">C5.4</p>
+        <p class="flare-time">22:05 UTC</p>
+      </div>
+    </div>
+</div>
+
+
+<div class="charts-container">
+  <h3 class="section-title">Data Visualizations (48 Hour Period)</h3>
+  <div class="chart-buttons">
+    <button onclick="showChart('kpChart', this)" class="active">KP Index</button>
+    <button onclick="showChart('solarWindChart', this)">Solar Wind</button>
+    <button onclick="showChart('densityChart', this)">Wind Density</button>
+    <button onclick="showChart('imfChart', this)">IMF Bz</button>
+    <button onclick="showChart('flareChart', this)">Solar Flares</button>
+  </div>
+  <canvas id="kpChart" class="active"></canvas>
+  <canvas id="solarWindChart"></canvas>
+  <canvas id="densityChart"></canvas>
+  <canvas id="imfChart"></canvas>
+  <canvas id="flareChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartInstances = {};
+
+  function showChart(id, buttonEl) {
+    // Hide all charts and remove active class from all buttons
+    document.querySelectorAll('.charts-container canvas').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.chart-buttons button').forEach(b => b.classList.remove('active'));
+
+    // Show the selected chart and set its button to active
+    document.getElementById(id).classList.add('active');
+    buttonEl.classList.add('active');
+
+    // If the chart hasn't been created yet, create it
+    if (!chartInstances[id]) {
+      createChart(id);
+    }
+  }
+
+  const chartFont = { family: "'Poppins', sans-serif" };
+  const rootStyles = getComputedStyle(document.documentElement);
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: rootStyles.getPropertyValue('--text-color'), font: chartFont } },
+      tooltip: { 
+        enabled: true, 
+        backgroundColor: 'rgba(10, 10, 10, 0.8)',
+        titleFont: { ...chartFont, size: 14 },
+        bodyFont: { ...chartFont, size: 12 },
+        padding: 10,
+        cornerRadius: 8,
+        borderColor: 'rgba(255, 140, 0, 0.5)',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      x: { 
+        ticks: { color: rootStyles.getPropertyValue('--text-color'), font: chartFont, maxRotation: 45, minRotation: 45 }, 
+        grid: { color: rootStyles.getPropertyValue('--border-color') } 
+      },
+      y: { 
+        ticks: { color: rootStyles.getPropertyValue('--text-color'), font: chartFont }, 
+        grid: { color: rootStyles.getPropertyValue('--border-color') }, 
+        beginAtZero: true 
+      }
+    }
+  };
+
+  const chartLabels = Array.from({length: 24}, (_, i) => `${String(i*2).padStart(2, '0')}:00`);
+
+  function createChart(id) {
+    const ctx = document.getElementById(id).getContext('2d');
+    
+    const kpJumps = [1, 1, 1, 2, 2, 3, 4, 5, 6, 6, 5, 4, 3, 3, 2, 2, 2, 1, 1, 1, 2, 3, 3, 2];
+    const windSpike = [350, 360, 355, 370, 400, 450, 580, 650, 640, 630, 600, 550, 520, 510, 500, 480, 470, 450, 440, 430, 450, 480, 470, 460];
+    const densitySpike = [5, 5, 6, 7, 8, 15, 25, 12, 8, 7, 6, 6, 5, 5, 5, 6, 7, 7, 8, 9, 10, 8, 7, 6];
+    const imfDip = [4, 5, 3, 2, 1, -2, -8, -12, -10, -9, -5, -2, 1, 3, 4, 3, 2, 1, 0, -1, -3, -2, 1, 3];
+    const flareProb = [5, 5, 10, 10, 15, 15, 20, 40, 45, 55, 50, 40, 30, 25, 20, 15, 15, 10, 10, 15, 20, 25, 20, 15];
+
+    let chartConfig;
+
+    switch (id) {
+      case 'kpChart':
+        chartConfig = {
+          type: 'bar',
+          data: { 
+            labels: chartLabels, 
+            datasets: [{ 
+              label: 'Observed Kp Index', 
+              data: kpJumps, 
+              backgroundColor: (context) => {
+                const value = context.raw;
+                if (value >= 6) return rootStyles.getPropertyValue('--severity-critical');
+                if (value >= 5) return rootStyles.getPropertyValue('--severity-high');
+                if (value >= 4) return rootStyles.getPropertyValue('--severity-medium');
+                return rootStyles.getPropertyValue('--severity-low');
+              },
+              borderRadius: 4,
+              barPercentage: 0.8,
+              categoryPercentage: 0.9,
+            }] 
+          },
+          options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, max: 9 } } }
+        };
+        break;
+      
+      case 'solarWindChart':
+        const solarWindGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        solarWindGradient.addColorStop(0, 'rgba(0, 191, 255, 0.6)');
+        solarWindGradient.addColorStop(1, 'rgba(0, 191, 255, 0.0)');
+        chartConfig = {
+          type: 'line',
+          data: { 
+            labels: chartLabels, 
+            datasets: [{ 
+              label: 'Solar Wind Speed (km/s)', 
+              data: windSpike, 
+              borderColor: rootStyles.getPropertyValue('--accent-wind'), 
+              backgroundColor: solarWindGradient, 
+              fill: true, 
+              tension: 0.4, 
+              pointBackgroundColor: rootStyles.getPropertyValue('--accent-wind'), 
+              pointRadius: 2,
+              borderWidth: 2
+            }] 
+          },
+          options: commonOptions
+        };
+        break;
+
+      case 'densityChart':
+        const densityGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        densityGradient.addColorStop(0, 'rgba(3, 169, 244, 0.6)');
+        densityGradient.addColorStop(1, 'rgba(3, 169, 244, 0.0)');
+        chartConfig = {
+          type: 'line',
+          data: { 
+            labels: chartLabels, 
+            datasets: [{ 
+              label: 'Solar Wind Density (p/cm³)', 
+              data: densitySpike, 
+              borderColor: rootStyles.getPropertyValue('--accent-density'), 
+              backgroundColor: densityGradient, 
+              fill: true, 
+              tension: 0.4, 
+              pointBackgroundColor: rootStyles.getPropertyValue('--accent-density'), 
+              pointRadius: 2,
+              borderWidth: 2
+            }] 
+          },
+          options: commonOptions
+        };
+        break;
+
+      case 'imfChart':
+        const imfGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        imfGradient.addColorStop(0, 'rgba(156, 39, 176, 0.6)');
+        imfGradient.addColorStop(1, 'rgba(156, 39, 176, 0.0)');
+        chartConfig = {
+          type: 'line',
+          data: { 
+            labels: chartLabels, 
+            datasets: [{ 
+              label: 'IMF Bz (nT)', 
+              data: imfDip, 
+              borderColor: rootStyles.getPropertyValue('--accent-geomagnetic'), 
+              backgroundColor: imfGradient, 
+              fill: true, 
+              tension: 0.4, 
+              pointBackgroundColor: rootStyles.getPropertyValue('--accent-geomagnetic'), 
+              pointRadius: 2,
+              borderWidth: 2
+            }] 
+          },
+          options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: false } } }
+        };
+        break;
+
+      case 'flareChart':
+        chartConfig = {
+          type: 'bar',
+          data: { 
+            labels: chartLabels, 
+            datasets: [{ 
+              label: 'M-Class Flare Probability (%)', 
+              data: flareProb, 
+              backgroundColor: rootStyles.getPropertyValue('--accent-flare'), 
+              borderRadius: 4 
+            }] 
+          },
+          options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, max: 100 } } }
+        };
+        break;
+    }
+    
+    if (chartConfig) {
+      chartInstances[id] = new Chart(ctx, chartConfig);
+    }
+  }
+
+  // Initialize the first chart on page load
+  createChart('kpChart');
+</script>
+
 </body>
 </html>
